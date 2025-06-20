@@ -1,3 +1,4 @@
 env
 commands.txt
 docinium/__pycache__/
+docinium/docinium_engine/db.sqlite3
