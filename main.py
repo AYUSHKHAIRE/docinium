@@ -11,4 +11,4 @@ except Exception as e:
     print(f"Caught error: {e}")
 
 ship1.wait(5)
-ship.undock()
+ship.unDock()
