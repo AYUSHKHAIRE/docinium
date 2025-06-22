@@ -10,25 +10,20 @@ logger.info("Starting script...")
 
 # Set headless mode (optional)
 options = Options()
-options.headless = True  # Set to False if you want to see the browser
+options.add_argument("--headless")  
 
 # Launch Firefox with options
 driver = webdriver.Firefox(options=options)
 
 try:
     # Visit site
-    driver.get("https://dev.to")
-    logger.info("Opened https://dev.to")
+    driver.get("https://ayushkhaire.site")
+    logger.info("Opened https://ayushkhaire.site")
 
     # Wait for page to load (simple wait; can use WebDriverWait for better practice)
     time.sleep(3)
 
-    # Find the search field (new Selenium syntax using By)
-    search_input = driver.find_element(By.ID, "nav-search")
-    search_input.send_keys("Selenium")
-    search_input.send_keys(Keys.ENTER)
-
-    logger.info("Search performed successfully.")
+    logger.info("title: %s", driver.title)
 
 finally:
     # Close the browser
