@@ -114,7 +114,7 @@ class DocShip:
         """
         time.sleep(time_in_seconds)
 
-    def undock(self):
+    def unDock(self):
         """
         Stops the running engine process and frees the port.
 
@@ -130,3 +130,15 @@ class DocShip:
         else:
             print("No engine process to stop.")
         self.port = None
+        
+    def load_the_container(self , container_name):
+        """
+        Loads the specified docker container.
+
+        Args:
+            container_name (str): The name of the container to load.
+        """
+        print(f"Loading the container: {container_name}...")
+        # Placeholder for actual loading logic
+        # This could involve pulling a Docker image, etc.
+        time.sleep(2)
