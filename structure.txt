@@ -1,21 +1,27 @@
-docinium
-├── container
-│   ├── commands.txt
-│   ├── Dockerfile
-│   ├── logger_config.py
-│   ├── requirements.txt
-│   └── script.py
-├── docinium_engine
-│   ├── db.sqlite3
+.
+├── commands.txt
+├── docinium
+│   ├── container
+│   │   ├── commands.txt
+│   │   ├── Dockerfile
+│   │   ├── logger_config.py
+│   │   ├── requirements.txt
+│   │   └── script.py
 │   ├── docinium_engine
-│   │   ├── asgi.py
-│   │   ├── __init__.py
-│   │   ├── settings.py
-│   │   ├── urls.py
-│   │   └── wsgi.py
-│   └── manage.py
-├── exceptions.py
-├── __init__.py
-└── ship.py
+│   │   ├── db.sqlite3
+│   │   ├── docinium_engine
+│   │   │   ├── asgi.py
+│   │   │   ├── __init__.py
+│   │   │   ├── settings.py
+│   │   │   ├── urls.py
+│   │   │   └── wsgi.py
+│   │   └── manage.py
+│   ├── exceptions.py
+│   ├── __init__.py
+│   └── ship.py
+├── main.py
+├── README.md
+├── requirements.txt
+└── structure.txt
 
-4 directories, 15 files
+5 directories, 20 files
