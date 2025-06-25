@@ -1,0 +1,15 @@
+{% extends '../base.html' %} {% load static %} {% block content %}
+<link rel="stylesheet" href="{% static '/css/home.css' %}" />
+<section class="hero">
+    <div class="container">
+        <h1>Welcome to Docinium</h1>
+        <p>Your docker + selenium , your way.</p>
+        {% if user.is_authenticated %}
+        <p>Welcome back, {{ user.username }}!</p>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary">log in</a> to get started .
+        {% endif %}
+        
+    </div>
+</section>
+{% endblock content %}

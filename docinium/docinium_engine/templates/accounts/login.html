@@ -1,0 +1,26 @@
+{% extends "base.html" %} {% block content %}
+<div class="maincontainer"  style="height: 100vh; display: flex; justify-content: center; align-items: center;">
+  <form class="container" method="post" action="{% url 'login' %}">
+    <h1>Login</h1>
+    <h3>We already created a user "admin" for you .</h3>
+    {% csrf_token %}
+    <input
+      class="form-input"
+      type="text"
+      name="username"
+      id="username"
+      placeholder="Username"
+      value = "admin"
+    />
+    <input
+      class="form-input"
+      type="password"
+      name="password"
+      id="password"
+      placeholder="Password"
+      value = "admin"
+    />
+    <button class="form-button" type="submit">Submit</button>
+  </form>
+</div>
+{% endblock content %}
