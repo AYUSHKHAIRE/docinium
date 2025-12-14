@@ -6,9 +6,10 @@ WORKDIR /container
 COPY requirements.txt .
 COPY script.py .
 COPY logger_config.py .
+COPY socket_client.py .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Install system dependencies for Firefox and Geckodriver
 RUN apt-get update && apt-get install -y \

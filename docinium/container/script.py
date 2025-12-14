@@ -4,6 +4,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
+from socket_client import WebSocketClient
 
 # Log start
 logger.info("Starting script...")
@@ -24,6 +25,15 @@ try:
     time.sleep(3)
 
     logger.info("title: %s", driver.title)
+
+    # try to connect to the WebSocket server
+
+    WS_CLIENT = WebSocketClient(
+        user_id="test_user",
+        auth_token="test_token",
+    )
+
+    WS_CLIENT.start_in_thread()
 
 finally:
     # Close the browser
