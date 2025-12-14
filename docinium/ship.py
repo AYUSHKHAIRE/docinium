@@ -4,6 +4,10 @@ import errno
 import subprocess
 import os
 import time
+from dotenv import load_dotenv
+from docinium.container.logger_config import logger
+from docinium.dockerclient import DockerManager
+import uuid
 
 # my own functionalities
 from docinium.exceptions import (
@@ -30,14 +34,20 @@ class DocShip:
         engine_process (Popen): Reference to the subprocess running the server.
     """
     
-    def __init__(self):
+    def __init__(self,name, port):
         """
         Initializes the DocShip instance with default values.
         """
-        self.port = None
+        if name:
+            self.name = name
+        else:
+            id = str(uuid.uuid4())[:8]
+            self.name = "DocShip_" + id
+        self.port = port
         self.engine_process = None
+        self.docker_manager = DockerManager()
 
-    def _is_port_in_use(self, port):
+    def _is_port_in_use(self):
         """
         Checks if a given port is currently in use.
 
@@ -56,7 +66,7 @@ class DocShip:
         ) as s:
             try:
                 s.bind(
-                    ("127.0.0.1", port)
+                    ("0.0.0.0", self.port)
                 )
                 return False  # Port is free
             except socket.error as e:
@@ -65,7 +75,7 @@ class DocShip:
                 else:
                     raise
 
-    def _start_the_engine(self, port):
+    def _start_the_engine(self):
         """
         Starts the Django engine on the specified port.
 
@@ -78,14 +88,26 @@ class DocShip:
         manage_py_path = os.path.abspath("docinium/docinium_engine/manage.py")
         try:
             self.engine_process = subprocess.Popen(
-                ["python", manage_py_path, "runserver", str(port)],
+                ["python", manage_py_path, "runserver", "0.0.0.0:"+str(self.port)],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
             )
         except Exception as e:
             raise DockShipError() from e
 
-    def dock(self, port=12345):
+    def _check_image(self, image_name):
+        """
+        Checks if the specified Docker image exists.
+
+        Args:
+            image_name (str): The name of the Docker image to check.
+
+        Returns:
+            bool: True if the image exists, False otherwise.
+        """
+        return self.docker_manager.check_if_image_exists(image_name)
+
+    def dock(self):
         """
         Attempts to start the Django engine on the specified port.
 
@@ -96,15 +118,19 @@ class DocShip:
             PortInUseError: If the specified port is already occupied.
             DockShipError: If the engine fails to start.
         """
-        self.port = port
-        if self._is_port_in_use(port):
-            raise PortInUseError(port)
+        if self._is_port_in_use():
+            raise PortInUseError(self.port)
         try:
-            self._start_the_engine(port)
-            print(f"Docked the ship at http://localhost:{self.port}...")
+            self._start_the_engine()
+            logger.info(f"Docked the {self.name} at http://0.0.0.0:{self.port} successfully...")
+            image_exist = self._check_image("docinium_container")
+            if not image_exist:
+                logger.warning("Docker image 'docinium_container' does not exist.")
+            else:
+                logger.info("Docker image 'docinium_container' found.")
         except DockShipError as e:
             raise e
-
+    
     def wait(self, time_in_seconds=10):
         """
         Pauses the current process to allow the engine to initialize or stay up.
@@ -139,6 +165,5 @@ class DocShip:
             container_name (str): The name of the container to load.
         """
         print(f"Loading the container: {container_name}...")
-        # Placeholder for actual loading logic
-        # This could involve pulling a Docker image, etc.
+        
         time.sleep(2)
