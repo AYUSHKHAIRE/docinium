@@ -25,12 +25,13 @@ SECRET_KEY = 'django-insecure-i@4)=4*9+s^qwh*)r$hh%85)3o^_7!d+2*=4vo#ds8ewlvqr*8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ["0.0.0.0", "localhost","127.0.0.1"]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,10 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'core',  
-    'connector'
+    'connector',
+
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -70,7 +73,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'docinium_engine.wsgi.application'
-
+ASGI_APPLICATION = "docinium_engine.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -82,6 +85,14 @@ DATABASES = {
     }
 }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -126,3 +137,27 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# for cors and csrf for docker
+
+from connector.utils import get_local_ip
+
+import os
+PORT = os.getenv("PORT_TO_USE_FOR_DOCINIUM")
+
+LOCAL_IP_ADDRESS = get_local_ip()
+# add to allowed hosts
+ALLOWED_HOSTS.append(LOCAL_IP_ADDRESS) 
+ALLOWED_HOSTS.append('localhost') 
+
+# allow some origins 
+CORS_ALLOWED_ORIGINS = [
+    f"http://{LOCAL_IP_ADDRESS}:{PORT}",
+]
+# csrf origins 
+CSRF_TRUSTED_ORIGINS = [
+    f"http://{LOCAL_IP_ADDRESS}:{PORT}",
+]
+CORS_ALLOW_CREDENTIALS = True  # Allow cookies & authentication
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+CORS_ALLOW_HEADERS = ["*"]
