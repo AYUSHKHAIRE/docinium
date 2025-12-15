@@ -107,6 +107,59 @@ class DocShip:
         """
         return self.docker_manager.check_if_image_exists(image_name)
 
+    def _check_and_pull_required_images(self, image_names):
+        """
+        Checks if the specified Docker image exists, and pulls it if it doesn't.
+
+        Args:
+            image_names (list): The list of Docker image names to check and pull.
+        """
+        for image_name in image_names:
+            if not self._check_image(image_name):
+                logger.warning(f"Docker image {image_name} does not exist. Attempting to pull it...")
+                logger.info(f"Pulling Docker image: {image_name}")
+                status = self.docker_manager.pull_image(image_name)
+                if status:
+                    logger.info(f"Docker image {image_name} pulled successfully.")
+            else:
+                logger.info(f"Docker image {image_name} already exists.")
+        return True
+
+    def _setup(self):
+        # pull the required images for docker
+        required_images  = {
+            "redis:latest": {
+                "container_name": "docinium_redis",
+                "port_map": {"6379/tcp": 6379},
+                "network_name": "docinium_network"
+            },
+            "oznu/guacamole:latest": {
+                "container_name": "docinium_guacamole",
+                "port_map": {"8080/tcp": 8080},
+                "network_name": "docinium_network",
+                "volumes": {
+                    "guac_config": "/config"
+                }
+            }
+        }
+        if self._check_and_pull_required_images(required_images.keys()):
+            logger.info("All required Docker images are present.")
+        # create or check new docker network
+        network_name = "docinium_network"
+        self.docker_manager.create_docker_network(network_name)
+        for cont_k , cont_v in required_images.items():
+            self.docker_manager.spin_up_docker_container(
+                image_name=cont_k,
+                container_name=cont_v["container_name"],
+                network_name=cont_v["network_name"],
+                port_map=cont_v["port_map"],
+                detach=True
+            )
+        # start the engine
+        time.sleep(3)
+        self._start_the_engine()
+        logger.info(f"Docked the {self.name} at http://0.0.0.0:{self.port} successfully...")
+
     def dock(self):
         """
         Attempts to start the Django engine on the specified port.
@@ -121,8 +174,7 @@ class DocShip:
         if self._is_port_in_use():
             raise PortInUseError(self.port)
         try:
-            self._start_the_engine()
-            logger.info(f"Docked the {self.name} at http://0.0.0.0:{self.port} successfully...")
+            self._setup()
             image_exist = self._check_image("docinium_container")
             if not image_exist:
                 logger.warning("Docker image 'docinium_container' does not exist.")
