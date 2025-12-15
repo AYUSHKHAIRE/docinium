@@ -1,41 +1,93 @@
-from logger_config import logger
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 import time
-from socket_client import WebSocketClient
+import logging
+import undetected_chromedriver as uc
 
-# Log start
-logger.info("Starting script...")
+logger = logging.getLogger(__name__)
 
-# Set headless mode (optional)
-options = Options()
-options.add_argument("--headless")  
 
-# Launch Firefox with options
-driver = webdriver.Firefox(options=options)
+class SeleniumLauncher:
+    """
+    Launch undetected Chrome Selenium driver and resize window accurately.
+    """
 
-try:
-    # Visit site
-    driver.get("https://ayushkhaire.site")
-    logger.info("Opened https://ayushkhaire.site")
+    def __init__(self, screen_width: int = 1920, screen_height: int = 1080, headless: bool = True):
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.headless = headless
+        self.driver = None
 
-    # Wait for page to load (simple wait; can use WebDriverWait for better practice)
-    time.sleep(3)
+    def setup_selenium_driver(self):
+        """
+        Setup undetected Chrome Selenium driver,
+        resize the window accurately.
 
-    logger.info("title: %s", driver.title)
+        Output:
+            None (sets self.driver)
+        """
+        start_time = time.time()
 
-    # try to connect to the WebSocket server
+        # ------------------------------------------------------------
+        # Chrome Options
+        # ------------------------------------------------------------
+        chrome_options = uc.ChromeOptions()
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_argument("--disable-infobars")
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--start-maximized")
 
-    WS_CLIENT = WebSocketClient(
-        user_id="test_user",
-        auth_token="test_token",
-    )
+        # if self.headless:
+        #     chrome_options.add_argument("--headless=new")
 
-    WS_CLIENT.start_in_thread()
+        chrome_options.set_capability(
+            "goog:loggingPrefs", {"browser": "ALL"}
+        )
 
-finally:
-    # Close the browser
-    driver.quit()
-    logger.info("Browser closed.")
+        # ------------------------------------------------------------
+        # Launch Driver
+        # ------------------------------------------------------------
+        driver = uc.Chrome(
+            options=chrome_options,
+            use_subprocess=True
+        )
+
+        # ------------------------------------------------------------
+        # Accurate Window Resize (outer vs inner)
+        # ------------------------------------------------------------
+        outer_width = driver.execute_script("return window.outerWidth;")
+        inner_width = driver.execute_script("return window.innerWidth;")
+        outer_height = driver.execute_script("return window.outerHeight;")
+        inner_height = driver.execute_script("return window.innerHeight;")
+
+        width_diff = outer_width - inner_width
+        height_diff = outer_height - inner_height
+
+        final_width = self.screen_width + width_diff
+        final_height = self.screen_height + height_diff
+
+        driver.set_window_size(final_width, final_height)
+
+        # ------------------------------------------------------------
+        # Finalize
+        # ------------------------------------------------------------
+        self.driver = driver
+
+        end_time = time.time()
+        logger.info(
+            f"[ SETUP ] Undetected Chrome initialized in "
+            f"{end_time - start_time:.4f} seconds | "
+            f"Viewport: {self.screen_width}x{self.screen_height}"
+        )
+
+launcher = SeleniumLauncher(
+    screen_width=1920,
+    screen_height=1080,
+    headless=True
+)
+
+launcher.setup_selenium_driver()
+driver = launcher.driver
+
+driver.get("https://www.google.com")
+time.sleep(5000)
