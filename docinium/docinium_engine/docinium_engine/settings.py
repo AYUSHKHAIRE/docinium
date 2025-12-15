@@ -89,6 +89,9 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
+            # using docker image redis:latest
+            # attempting to connect to redis server at
+            # docker network docinium_network
             "hosts": [("127.0.0.1", 6379)],
         },
     },
