@@ -1,0 +1,9 @@
+docker build -t docinium_container .
+
+docker run -it --rm --shm-size=2g docinium_container 
+
+docker run -d \                                     
+  -p 3389:3389 \
+  --network docinium_network --name=docinium_container_1\
+  -e SCREENDEX=1920X1080 \
+  docinium_container 
