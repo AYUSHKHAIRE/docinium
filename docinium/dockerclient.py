@@ -83,3 +83,12 @@ class DockerManager:
             return container
         except Exception as e:
             logger.error(f"[ docinium engine > dockerclient ] Failed to run container '{container_name}': {e}")
+
+    def delete_docker_container(self, container_name):
+        try:
+            container = self.client.containers.get(container_name)
+            container.stop()
+            container.remove()
+            logger.info(f"[ docinium engine > dockerclient ] Container '{container_name}' stopped and removed successfully.")
+        except Exception as e:
+            logger.error(f"[ docinium engine > dockerclient ] Failed to delete container '{container_name}': {e}")
