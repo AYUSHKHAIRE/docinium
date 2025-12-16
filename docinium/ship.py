@@ -148,6 +148,7 @@ class DocShip:
         network_name = "docinium_network"
         self.docker_manager.create_docker_network(network_name)
         for cont_k , cont_v in required_images.items():
+            self.docker_manager.delete_docker_container(cont_v["container_name"])
             self.docker_manager.spin_up_docker_container(
                 image_name=cont_k,
                 container_name=cont_v["container_name"],
