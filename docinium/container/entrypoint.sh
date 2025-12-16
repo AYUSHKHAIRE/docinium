@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set +e
 
 # ------------------------------------------------------------
 # Create runtime directories required by dbus
@@ -10,15 +10,15 @@ chmod 755 /run/dbus
 # ------------------------------------------------------------
 # Create user if missing (safe on rebuild)
 # ------------------------------------------------------------
-if ! id ubuntu >/dev/null 2>&1; then
-    groupadd -g 1020 ubuntu || true
+if ! id docinium >/dev/null 2>&1; then
+    groupadd -g 1020 docinium || true
     useradd \
         -u 1020 \
         -g 1020 \
         -G sudo \
         -m \
-        -s /bin/bash ubuntu
-    echo "ubuntu:ubuntu" | chpasswd
+        -s /bin/bash docinium
+    echo "docinium:docinium" | chpasswd
 fi
 
 # ------------------------------------------------------------
@@ -64,18 +64,20 @@ fi
 # ------------------------------------------------------------
 # Create autostart for Selenium script
 # ------------------------------------------------------------
-mkdir -p /home/ubuntu/.config/autostart
-cat > /home/ubuntu/.config/autostart/selenium.desktop <<EOF
+mkdir -p /home/docinium/.config/autostart
+cat > /home/docinium/.config/autostart/selenium.desktop <<EOF
 [Desktop Entry]
 Type=Application
 Name=Selenium Script
 Exec=python3 /container/script.py
 X-GNOME-Autostart-enabled=true
 EOF
-chown -R ubuntu:ubuntu /home/ubuntu/.config
+chown -R docinium:docinium /home/docinium/.config
 
-# ------------------------------------------------------------
-# Start XRDP sesman and server in background
-# ------------------------------------------------------------
+echo "[entrypoint] starting xrdp services"
+# run XRDP in background
 /usr/sbin/xrdp-sesman &
-/usr/sbin/xrdp --nodaemon
+/usr/sbin/xrdp &
+
+echo "[entrypoint] container ready, blocking PID 1"
+/bin/bash -c "tail -f /dev/null"
