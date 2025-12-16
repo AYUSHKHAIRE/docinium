@@ -1,6 +1,5 @@
 env
 commands.txt
-docinium/__pycache__/
 docinium/container/containerenv
 docinium/container/commands.txt
 *__pycache__/
