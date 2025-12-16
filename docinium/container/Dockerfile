@@ -52,16 +52,21 @@ RUN apt update && apt install -y \
 COPY --from=builder /tmp/out /
 
 # ------------------------------------------------------------
-# PulseAudio XRDP configuration (CORRECT WAY)
+# PulseAudio XRDP configuration
 # ------------------------------------------------------------
-RUN install -d /etc/pulse && \
+RUN mkdir -p /etc/pulse && \
     echo "load-module module-xrdp-sink" > /etc/pulse/xrdp.pa && \
     echo "load-module module-xrdp-source" >> /etc/pulse/xrdp.pa
 
-# Autostart PulseAudio for XRDP sessions
+# Autostart PulseAudio for XFCE XRDP sessions
 RUN mkdir -p /etc/xdg/autostart && \
-    printf "[Desktop Entry]\nType=Application\nName=PulseAudio XRDP\nExec=pulseaudio --start --exit-idle-time=-1\nOnlyShowIn=XFCE;\n" \
-    > /etc/xdg/autostart/pulseaudio-xrdp.desktop
+    cat <<EOF > /etc/xdg/autostart/pulseaudio-xrdp.desktop
+[Desktop Entry]
+Type=Application
+Name=PulseAudio XRDP
+Exec=pulseaudio --start --disallow-exit --exit-idle-time=-1 --daemonize=yes -F /etc/pulse/xrdp.pa
+OnlyShowIn=XFCE;
+EOF
 
 # ------------------------------------------------------------
 # Install Google Chrome
@@ -88,13 +93,12 @@ RUN apt update && apt install -y \
 # ------------------------------------------------------------
 # Create non-root user for XRDP
 # ------------------------------------------------------------
-RUN useradd -m -s /bin/bash ubuntu && \
-    echo "ubuntu:ubuntu" | chpasswd && \
-    usermod -aG sudo ubuntu
+RUN useradd -m -s /bin/bash docinium && \
+    echo "docinium:docinium" | chpasswd && \
+    usermod -aG sudo docinium
 
 # Allow sudo without password (optional)
-RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
+RUN echo "docinium ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 # ------------------------------------------------------------
 # XRDP configuration
 # ------------------------------------------------------------
