@@ -1,5 +1,6 @@
 env
 commands.txt
 docinium/container/containerenv
+docinium/docinium_engine/connector/migrations
 *__pycache__/
 *.pyc
