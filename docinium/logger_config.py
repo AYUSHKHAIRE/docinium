@@ -20,6 +20,7 @@ if not logger.handlers:
 
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+   
 
 # VERY IMPORTANT (prevents double logging via root logger)
 logger.propagate = False
