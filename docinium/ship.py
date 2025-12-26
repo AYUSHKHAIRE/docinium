@@ -7,6 +7,7 @@ import time
 from dotenv import load_dotenv
 from docinium.container.logger_config import logger
 from docinium.dockerclient import DockerManager
+import threading
 import uuid
 
 # my own functionalities
@@ -46,6 +47,7 @@ class DocShip:
         self.port = port
         self.engine_process = None
         self.docker_manager = DockerManager()
+        self.docker_engine_thread = None
 
     def _is_port_in_use(self):
         """
@@ -75,6 +77,10 @@ class DocShip:
                 else:
                     raise
 
+    def stream_logs(self,proc):
+        for line in proc.stdout:
+            logger.info(f"[docinium_engine > django] {line.strip()}")
+            
     def _start_the_engine(self):
         """
         Starts the Django engine on the specified port.
@@ -87,11 +93,17 @@ class DocShip:
         """
         manage_py_path = os.path.abspath("docinium/docinium_engine/manage.py")
         try:
+            import sys
             self.engine_process = subprocess.Popen(
-                ["python", manage_py_path, "runserver", "0.0.0.0:"+str(self.port)],
+                [sys.executable, "-u" ,manage_py_path, "runserver", f"0.0.0.0:{self.port}"],
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1 
             )
+            time.sleep(3)
+            threading.Thread(target=self.stream_logs, args=(self.engine_process,), daemon=True).start()
+            logger.info("Starter command for django ran .")
         except Exception as e:
             raise DockShipError() from e
 
@@ -126,6 +138,7 @@ class DocShip:
         return True
 
     def _setup(self):
+        os.environ["PORT_TO_USE_FOR_DOCINIUM"] = str(self.port)
         # pull the required images for docker
         required_images  = {
             "redis:latest": {
@@ -148,16 +161,16 @@ class DocShip:
         network_name = "docinium_network"
         self.docker_manager.create_docker_network(network_name)
         for cont_k , cont_v in required_images.items():
-            self.docker_manager.delete_docker_container(cont_v["container_name"])
-            self.docker_manager.spin_up_docker_container(
-                image_name=cont_k,
-                container_name=cont_v["container_name"],
-                network_name=cont_v["network_name"],
-                port_map=cont_v["port_map"],
-                detach=True
-            )
+            if self.docker_manager.check_if_docker_container_exist(cont_v["container_name"]):
+                self.docker_manager.delete_docker_container(cont_v["container_name"])
+                self.docker_manager.spin_up_docker_container(
+                    image_name=cont_k,
+                    container_name=cont_v["container_name"],
+                    network_name=cont_v["network_name"],
+                    port_map=cont_v["port_map"],
+                    detach=True
+                )
         # start the engine
-        time.sleep(3)
         self._start_the_engine()
         logger.info(f"Docked the {self.name} at http://0.0.0.0:{self.port} successfully...")
 
@@ -203,9 +216,26 @@ class DocShip:
         if self.engine_process:
             self.engine_process.terminate()
             self.engine_process.wait()
-            if self._is_port_in_use(self.port):
+            if self._is_port_in_use():
                 raise UnDockShipError()
             print(f"Ship on port {self.port} has been undocked successfully.")
+            required_images  = {
+                    "redis:latest": {
+                        "container_name": "docinium_redis",
+                        "port_map": {"6379/tcp": 6379},
+                        "network_name": "docinium_network"
+                    },
+                    "oznu/guacamole:latest": {
+                        "container_name": "docinium_guacamole",
+                        "port_map": {"8080/tcp": 8080},
+                        "network_name": "docinium_network",
+                        "volumes": {
+                            "guac_config": "/config"
+                        }
+                    }
+                }
+            for cont_k , cont_v in required_images.items():
+                self.docker_manager.delete_docker_container(cont_v["container_name"])
         else:
             print("No engine process to stop.")
         self.port = None
@@ -218,5 +248,3 @@ class DocShip:
             container_name (str): The name of the container to load.
         """
         print(f"Loading the container: {container_name}...")
-        
-        time.sleep(2)
