@@ -55,6 +55,23 @@ class DockerManager:
         except Exception as e:
             logger.error(f"[ docinium engine > dockerclient ] Failed to create Docker network '{network_name}': {e}")
 
+    def check_if_docker_container_exist(self, container_name: str) -> bool:
+        try:
+            container = self.client.containers.get(container_name)
+            if container.status == "running":
+                self.running_containers[f"{container.id}_{container_name}"] = container
+                logger.info(f"[ docinium engine > dockerclient ] Container '{container_name}' is running.")
+                return True
+            else:
+                logger.info(f"[ docinium engine > dockerclient ] Container '{container_name}' exists but is not running.")
+                return False
+        except docker.errors.NotFound:
+            logger.info(f"[ docinium engine > dockerclient ] Container '{container_name}' does not exist.")
+            return False
+        except Exception as e:
+            logger.error(f"[ docinium engine > dockerclient ] Error checking container '{container_name}': {e}")
+            return False
+
     def spin_up_docker_container(
         self,
         image_name,
