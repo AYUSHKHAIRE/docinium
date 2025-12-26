@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    'core',  
-    'connector',
+    "core",
+    "connector",
 
 ]
 
@@ -142,8 +142,14 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # for cors and csrf for docker
+import socket
 
-from connector.utils import get_local_ip
+def get_local_ip():
+# Gets the primary network interface's IP address
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.connect(("8.8.8.8", 80))  # Google's public DNS
+        local_ip = s.getsockname()[0]
+    return local_ip
 
 import os
 PORT = os.getenv("PORT_TO_USE_FOR_DOCINIUM")
@@ -151,6 +157,7 @@ PORT = os.getenv("PORT_TO_USE_FOR_DOCINIUM")
 LOCAL_IP_ADDRESS = get_local_ip()
 # add to allowed hosts
 ALLOWED_HOSTS.append(LOCAL_IP_ADDRESS) 
+ALLOWED_HOSTS.append("127.0.0.1") 
 ALLOWED_HOSTS.append('localhost') 
 
 # allow some origins 
@@ -160,6 +167,7 @@ CORS_ALLOWED_ORIGINS = [
 # csrf origins 
 CSRF_TRUSTED_ORIGINS = [
     f"http://{LOCAL_IP_ADDRESS}:{PORT}",
+    f"http://127.0.0.1:{PORT}",
 ]
 CORS_ALLOW_CREDENTIALS = True  # Allow cookies & authentication
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
