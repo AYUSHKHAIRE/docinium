@@ -7,6 +7,7 @@ import time
 from dotenv import load_dotenv
 from docinium.container.logger_config import logger
 from docinium.dockerclient import DockerManager
+from docinium.glucamole_manager import GucamoleClient
 import threading
 import uuid
 
@@ -47,6 +48,7 @@ class DocShip:
         self.port = port
         self.engine_process = None
         self.docker_manager = DockerManager()
+        self.guacomole_manager = GucamoleClient()
         self.docker_engine_thread = None
 
     def _is_port_in_use(self):
@@ -146,7 +148,7 @@ class DocShip:
                 "port_map": {"6379/tcp": 6379},
                 "network_name": "docinium_network"
             },
-            "oznu/guacamole:latest": {
+            "jwetzell/guacamole:latest": {
                 "container_name": "docinium_guacamole",
                 "port_map": {"8080/tcp": 8080},
                 "network_name": "docinium_network",
@@ -172,6 +174,9 @@ class DocShip:
                 )
         # start the engine
         self._start_the_engine()
+        # attempt guacamole
+        users = self.guacomole_manager.list_all_users()
+        logger.debug(f"Guacamole users {users}")
         logger.info(f"Docked the {self.name} at http://0.0.0.0:{self.port} successfully...")
 
     def dock(self):
