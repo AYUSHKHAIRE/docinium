@@ -8,7 +8,7 @@ import websockets
 from .logger_config import logger
 
 """
-WebSocket client to connect to the server and send/receive messages.
+WebSocket docinium_engine > websocket client to connect to the server and send/receive messages.
 input:
     --uri: str : WebSocket server URI
     --user_id: str : Unique user ID
@@ -28,7 +28,7 @@ output:
 """
 class WebSocketClient:
     """
-    WebSocket client to connect to the server and send/receive messages.
+    WebSocket docinium_engine > websocket client to connect to the server and send/receive messages.
     input:
         --uri: str : WebSocket server URI
         --user_id: str : Unique user ID
@@ -110,29 +110,29 @@ class WebSocketClient:
         self
     ):
         # Gets the primary network interface's IP address
-        logger.warning(f"Local IP Address:{self.ip}")
+        # logger.warning(f"Local IP Address:{self.ip}")
         try:
             headers = {
                 'Origin':f"http://{self.ip}:{self.port}",
                 "Authorization": f"Bearer {self.auth_token}"
             }
-            logger.debug(f"trying to connect to {self.uri}")
+            logger.info(f"[ docinium_engine > websocket client ] trying to connect to {self.uri}")
             self.websocket = await websockets.connect(
                 self.uri, 
                 additional_headers=headers
             )
-            logger.info(f"[ CLIENT ] Connected to server at {self.uri} with authentication.")
+            logger.info(f"[ docinium_engine > websocket client ] Connected to server at {self.uri} with authentication.")
 
             # Send registration message
             await self.send_message(
                 type="register", 
                 message="register request"
             )
-            logger.info(f"[ CLIENT ] Sent registration message for user_id: {self.user_id}")
+            logger.info(f"[ docinium_engine > websocket client ] Sent registration message for user_id: {self.user_id}")
             # Start listening for server messages
             await self.listen()
         except Exception as e:
-            logger.error(f"[ CLIENT ] Connection error: {e}")
+            logger.error(f"[ docinium_engine > websocket client ] Connection error: {e}")
 
     """
     send message to the websocket server
@@ -162,11 +162,11 @@ class WebSocketClient:
                         message_payload
                         )
                     )
-                logger.info(f"[ CLIENT ] Sent message: {len(message_payload)}")
+                logger.info(f"[ docinium_engine > websocket client ] Sent message: {len(message_payload)}")
             except Exception as e:
-                logger.error(f"[ CLIENT ] Error sending message: {e}")
+                logger.error(f"[ docinium_engine > websocket client ] Error sending message: {e}")
         else:
-            logger.warning("[ CLIENT ] WebSocket is not connected.")
+            logger.warning("[ docinium_engine > websocket client ] WebSocket is not connected.")
 
     """
     listen for messages from the server
@@ -184,12 +184,12 @@ class WebSocketClient:
         """Listen for messages from the server."""
         try:
             async for message in self.websocket:
-                logger.info(f"[ CLIENT ] Received message: {len(message)}")
+                logger.info(f"[ docinium_engine > websocket docinium_engine > websocket client ] Received message: {len(message)}")
                 await self.handle_message(
                     message
                 )
         except Exception as e:
-            logger.error(f"[ CLIENT ] Listening error: {e}")
+            logger.error(f"[ docinium_engine > websocket client ] Listening error: {e}")
 
     """
     close the websocket connection
@@ -205,7 +205,7 @@ class WebSocketClient:
     ):
         if self.websocket:
             await self.websocket.close()
-            logger.info("[ CLIENT ] WebSocket connection closed.")
+            logger.info("[ docinium_engine > websocket client ] WebSocket connection closed.")
 
     """
     send message from outside the websocket event loop
@@ -231,16 +231,16 @@ class WebSocketClient:
                 self.loop
             )
         else:
-            logger.warning("[ CLIENT ] WebSocket event loop is not running.")
+            logger.warning("[ docinium_engine > websocket client ] WebSocket event loop is not running.")
 
     async def handle_message(
         self, 
         message
     ):
-        logger.warning(f'{message}')
+        logger.info(f'[docinium_engine > websocket docinium_engine > websocket client]{message}')
         data = json.loads(message)
         if data.get("type") == "register":
-            logger.info(f"[ CLIENT ] Registration successful for user_id: {self.user_id}")
+            logger.info(f"[ docinium_engine > websocket docinium_engine > websocket client ] Registration successful for user_id: {self.user_id}")
             # Send hello message
             await self.send_message(
                 type="hello", 
