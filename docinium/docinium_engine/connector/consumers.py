@@ -24,7 +24,7 @@ class WebSocketConsumer(
             self.channel_name
         )
         await self.accept()
-        logger.debug(f"Connected to WebSocket room: {self.room_group_name}")
+        logger.info(f"Connected to WebSocket room: {self.room_group_name}")
 
     async def disconnect(
         self, 
@@ -60,13 +60,13 @@ class WebSocketConsumer(
                         "type": "register",
                         "message": f"Registered {user_id}"
                     }
-                    logger.debug(f"Registered user {user_id}")
+                    logger.info(f"Registered user {user_id}")
                 elif message_type == "hello":
                     response = {
                         "type": "hello",
                         "message": "Hello from server!"
                     }
-                    logger.debug(f"Saying hello to user {user_id}")
+                    logger.info(f"Saying hello to user {user_id}")
 
                 else:
                     response = {
