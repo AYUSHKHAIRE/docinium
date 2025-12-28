@@ -7,7 +7,7 @@ import time
 from dotenv import load_dotenv
 from docinium.container.logger_config import logger
 from docinium.dockerclient import DockerManager
-from docinium.glucamole_manager import GucamoleClient
+from docinium.glucamole_manager import GuacamoleClient
 import threading
 import uuid
 
@@ -48,7 +48,7 @@ class DocShip:
         self.port = port
         self.engine_process = None
         self.docker_manager = DockerManager()
-        self.guacomole_manager = GucamoleClient()
+        self.guacomole_manager = None
         self.docker_engine_thread = None
 
     def _is_port_in_use(self):
@@ -105,7 +105,7 @@ class DocShip:
             )
             time.sleep(3)
             threading.Thread(target=self.stream_logs, args=(self.engine_process,), daemon=True).start()
-            logger.info("Starter command for django ran .")
+            # logger.info("Starter command for django ran .")
         except Exception as e:
             raise DockShipError() from e
 
@@ -165,18 +165,19 @@ class DocShip:
         for cont_k , cont_v in required_images.items():
             if self.docker_manager.check_if_docker_container_exist(cont_v["container_name"]):
                 self.docker_manager.delete_docker_container(cont_v["container_name"])
-                self.docker_manager.spin_up_docker_container(
-                    image_name=cont_k,
-                    container_name=cont_v["container_name"],
-                    network_name=cont_v["network_name"],
-                    port_map=cont_v["port_map"],
-                    detach=True
-                )
+            self.docker_manager.spin_up_docker_container(
+                image_name=cont_k,
+                container_name=cont_v["container_name"],
+                network_name=cont_v["network_name"],
+                port_map=cont_v["port_map"],
+                detach=True
+            )
         # start the engine
         self._start_the_engine()
         # attempt guacamole
+        self.guacomole_manager = GuacamoleClient()
         users = self.guacomole_manager.list_all_users()
-        logger.debug(f"Guacamole users {users}")
+        # logger.debug(f"Guacamole users {users}")
         logger.info(f"Docked the {self.name} at http://0.0.0.0:{self.port} successfully...")
 
     def dock(self):
