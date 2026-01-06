@@ -5,6 +5,8 @@ from .logger_config import logger
 from .WebsocketClient import WebSocketClient
 import requests
 import socket
+import errno
+from .dockerclient import DockerManager
 
 def get_local_ip():
 # Gets the primary network interface's IP address
@@ -19,16 +21,17 @@ class Container:
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         if project_root not in sys.path:
             sys.path.insert(0, project_root)
-
         # Container name
-        self.name = name or f"Cont_{str(uuid.uuid4())[:8]}"
+        self.name = f"docinium_{name}" or f"docinium_{str(uuid.uuid4())[:8]}"
         self.ws_client = None
         self.local_ip = get_local_ip()
         self.url_to_connect = f"{self.local_ip}:{port_to_connect}"
         self.port_to_connect = port_to_connect
         self._django_initialized = False
-
+        self.docker_manager = DockerManager()
+        self.container_obj = None
         # Connect to Django & WebSocket
+        self._spin_docinium_container()
         self._connect()
 
     def _preregister_user_http(self,base_url, username, password=None):
@@ -48,6 +51,22 @@ class Container:
             )
         data = response.json()
         return username, data["user_id"], data["token"]
+
+    def _spin_docinium_container(self):
+        try:
+            if self.docker_manager.check_if_docker_container_exist(self.name):
+                self.docker_manager.delete_docker_container(self.name)
+            self.container_obj = self.docker_manager.spin_up_docker_container(
+                image_name="docinium_container",
+                network_name="docinium_network",
+                container_name=self.name,
+                environment={
+                    "SCREENDEX":"1920X1080"
+                }
+            )
+            logger.warning(f"spinned up {self.name} successfully . ")
+        except Exception as e:
+            logger.error(f"error in spinning up docinium container {e}")
 
     def _connect(self):
         _ , user_id , token = self._preregister_user_http(
