@@ -58,7 +58,7 @@ class DockerManager:
     def check_if_docker_container_exist(self, container_name: str) -> bool:
         try:
             container = self.client.containers.get(container_name)
-            if container.status == "running":
+            if container.status == "running" or "created":
                 self.running_containers[f"{container.id}_{container_name}"] = container
                 logger.info(f"[ docinium engine > dockerclient ] Container '{container_name}' is running.")
                 return True
