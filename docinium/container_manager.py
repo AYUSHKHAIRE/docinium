@@ -89,3 +89,6 @@ class Container:
 
         # Send a test message
         self.ws_client.send_message_thread_safe(type="hello", message="Hello, server!")
+
+    def __str__(self):
+        return self.name
