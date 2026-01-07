@@ -81,6 +81,7 @@ class GuacamoleClient:
             {
                 "Guacamole-Token": self.token,
                 "Accept": "application/json",
+                "Content-Type": "application/json",
             }
         )
 
@@ -90,3 +91,45 @@ class GuacamoleClient:
         response = self.session.get(users_url, timeout=self.timeout)
         response.raise_for_status()
         return response.json()
+    
+    def create_a_new_rdp_connection(
+            self,
+            name
+        ):
+        body_payload = {
+            "parentIdentifier": "ROOT",
+            "name": name,
+            "protocol": "rdp",
+            "parameters": {
+                "port": "3389",
+                "security": "rdp",
+                "disable-auth": "true",
+                "ignore-cert": "true",
+                "width": "1920",
+                "height": "1080",
+                "hostname": name,
+                "username": "docinium",
+                "password": "docinium"
+            },
+            "attributes": {
+                "max-connections": "",
+                "max-connections-per-user": "",
+                "weight": "",
+                "failover-only": "",
+                "guacd-port": "",
+                "guacd-encryption": "",
+                "guacd-hostname": ""
+            }
+        }
+        connections_url = f"{self.url}/api/session/data/{self.datasource}/connections"
+        # logger.warning(users_url)
+        try:
+            response = self.session.post(
+                connections_url, 
+                timeout=self.timeout,
+                json=body_payload
+            )
+            logger.debug(f"{response}")
+            return response.json()
+        except Exception as e:
+            logger.error(f"{e}")
