@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from docinium.container.logger_config import logger
 from docinium.dockerclient import DockerManager
 from docinium.glucamole_manager import GuacamoleClient
+from docinium.container_manager import Container
 import threading
 import uuid
 
@@ -50,6 +51,7 @@ class DocShip:
         self.docker_manager = DockerManager()
         self.guacomole_manager = None
         self.docker_engine_thread = None
+        self.mounted_containers = {}
 
     def _is_port_in_use(self):
         """
@@ -246,11 +248,34 @@ class DocShip:
             print("No engine process to stop.")
         self.port = None
         
-    def load_the_container(self , container_name):
+    def mount(self , container):
         """
         Loads the specified docker container.
 
         Args:
             container_name (str): The name of the container to load.
         """
-        print(f"Loading the container: {container_name}...")
+        if not isinstance( container , Container ):
+            logger.error("please pass a correct cockship container object .")
+            return ValueError(f"{container} is not a container object . ")
+        if not container.name:
+            logger.error("please pass a correct cockship container object .")
+            return ValueError(f"{container} is not a container object . ")
+        if container.name in self.mounted_containers:
+            logger.error("container name already in use and docked by this ship , please dock something else name .")
+            return ValueError(f"{container}.name already in use and docked by this ship , please dock something else name .")
+        try:
+            self.mounted_containers[container.name] = container
+            try:
+                resp = self.guacomole_manager.create_a_new_rdp_connection(
+                    name = container.name
+                )
+                # get client as
+                # http://localhost:8080/#/client/1?token=C85453D1102371CA5BD305007B0003AE27130AAEB45A3638D962C0379D3C57B1
+                logger.debug(f"{resp}")
+                logger.info("Container mounted successfully .")
+            except Exception as e:
+                logger.error(f"failed to create an rdp connection{e}")
+        except Exception as e:
+            logger.error(f"Error in mountaing container {e}")
+            return ValueError(f"{container} can't be mounted . {e}")
