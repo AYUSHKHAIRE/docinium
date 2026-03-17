@@ -147,7 +147,9 @@ class DocShip:
         required_images  = {
             "redis:latest": {
                 "container_name": "docinium_redis",
-                "port_map": {"6379/tcp": 6379},
+                # Do not bind Redis to a host port by default; it is only needed inside the Docker network.
+                # Binding to 6379 on the host can fail if Redis is already running on the host machine.
+                "port_map": None,
                 "network_name": "docinium_network"
             },
             "jwetzell/guacamole:latest": {
@@ -156,6 +158,14 @@ class DocShip:
                 "network_name": "docinium_network",
                 "volumes": {
                     "guac_config": "/config"
+                }
+            },
+            "ayushkhaire/remote-desktop-rdp-xfce-audio-firefox:latest": {
+                "container_name": "docinium_container",
+                "port_map": None,
+                "network_name": "docinium_network",
+                "volumes": {
+                    "container_data": "/data"
                 }
             }
         }
@@ -197,11 +207,12 @@ class DocShip:
             raise PortInUseError(self.port)
         try:
             self._setup()
-            image_exist = self._check_image("docinium_container")
+            # Ensure the expected container image exists (not the container name)
+            image_exist = self._check_image("ayushkhaire/remote-desktop-rdp-xfce-audio-firefox:latest")
             if not image_exist:
-                logger.warning("Docker image 'docinium_container' does not exist.")
+                logger.warning("Docker image 'ayushkhaire/remote-desktop-rdp-xfce-audio-firefox:latest' does not exist.")
             else:
-                logger.info("Docker image 'docinium_container' found.")
+                logger.info("Docker image 'ayushkhaire/remote-desktop-rdp-xfce-audio-firefox:latest' found.")
         except DockShipError as e:
             raise e
     
