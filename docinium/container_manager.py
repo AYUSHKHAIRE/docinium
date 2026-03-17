@@ -52,16 +52,18 @@ class Container:
         data = response.json()
         return username, data["user_id"], data["token"]
 
+    DOCINIUM_CONTAINER_IMAGE = "ayushkhaire/remote-desktop-rdp-xfce-audio-firefox:latest"
+
     def _spin_docinium_container(self):
         try:
             if self.docker_manager.check_if_docker_container_exist(self.name):
                 self.docker_manager.delete_docker_container(self.name)
             self.container_obj = self.docker_manager.spin_up_docker_container(
-                image_name="docinium_container",
+                image_name=self.DOCINIUM_CONTAINER_IMAGE,
                 network_name="docinium_network",
                 container_name=self.name,
                 environment={
-                    "SCREENDEX":"1920X1080"
+                    "SCREENDEX": "1920X1080"
                 }
             )
             logger.warning(f"spinned up {self.name} successfully . ")
