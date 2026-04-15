@@ -5,12 +5,13 @@ from .logger_config import logger
 def register_rdp_connection(
     container_connected_name: str,
     identifier: int,
-    token: str,
+    auth_token: str,
+    guacamole_token: str,
     base_url: str
 ):
-    url = f"{base_url}/connector/api/rdp-connection/{container_connected_name}/{identifier}/"
+    url = f"{base_url}/connector/api/rdp-connection/{container_connected_name}/{identifier}/{guacamole_token}/"
     headers = {
-        "Authorization": f"Token {token}"
+        "Authorization": f"Token {auth_token}"
     }
     response = requests.post(url, headers=headers)
     if response.status_code == 200:
