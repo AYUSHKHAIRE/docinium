@@ -62,8 +62,7 @@ class GuacamoleClient:
                 f"Cannot connect to Guacamole at {self.url}. "
                 f"Is the server running and port exposed?"
             ) from e
-
-        # logger.debug(response.text)
+            
         response.raise_for_status()
 
         json_resp = response.json()
@@ -129,7 +128,6 @@ class GuacamoleClient:
                 timeout=self.timeout,
                 json=body_payload
             )
-            logger.debug(f"{response}")
             return response.json()
         except Exception as e:
             logger.error(f"{e}")
