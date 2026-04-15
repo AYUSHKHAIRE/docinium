@@ -9,6 +9,12 @@ from django.contrib.auth import login, authenticate, logout
 def index(request):
     return render(request, 'core/index.html')
 
+def containers(request):
+    if not request.user.is_authenticated:
+        messages.info(request, 'Please log in to view containers.')
+        return redirect('login')
+    return render(request, 'core/containers.html')
+
 def Login(request):
     if request.method == "POST":
         username = request.POST.get('username')
