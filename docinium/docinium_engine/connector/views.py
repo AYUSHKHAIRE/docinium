@@ -3,9 +3,10 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 
 from .services import preregister_user
-
+from .models import rdpConnection , CustomToken
 
 @csrf_exempt  # required since this is called from external client
 @require_POST
@@ -53,4 +54,57 @@ def preregister_user_view(request):
             "token": token,
         },
         status=201
+    )
+
+def get_user_from_token(request):
+    auth = request.headers.get("Authorization")
+    if not auth:
+        return None
+    try:
+        prefix, token = auth.split()
+        if prefix != "Token":
+            return None
+    except:
+        return None
+    try:
+        token_obj = CustomToken.objects.get(key=token)
+        return token_obj.user
+    except CustomToken.DoesNotExist:
+        return None
+
+@csrf_exempt
+def egister_rdp_connection_view(
+    request, 
+    container_connected_name,
+    identifier
+):
+    """
+    HTTP endpoint to get the details of an RDP connection.
+    """
+
+    try:
+        user = get_user_from_token(request)
+        if not user:
+            return JsonResponse(
+                {"error": "Unauthorized"},
+                status=401
+            )
+        connection = rdpConnection.objects.create(
+            user=user,
+            container_connected_name=container_connected_name,
+            identifier=identifier
+        )
+    except rdpConnection.DoesNotExist:
+        return JsonResponse(
+            {"error": "RDP connection not found"},
+            status=404
+        )
+
+    return JsonResponse(
+        {
+            "user": connection.user.username,
+            "container_connected_name": connection.container_connected_name,
+            "identifier": connection.identifier,
+        },
+        status=200
     )
