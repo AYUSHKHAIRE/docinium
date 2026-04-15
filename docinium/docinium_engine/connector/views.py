@@ -1,4 +1,5 @@
 import json
+import os
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -76,7 +77,8 @@ def get_user_from_token(request):
 def egister_rdp_connection_view(
     request, 
     container_connected_name,
-    identifier
+    identifier,
+    guacamole_client_token
 ):
     """
     HTTP endpoint to get the details of an RDP connection.
@@ -92,7 +94,8 @@ def egister_rdp_connection_view(
         connection = rdpConnection.objects.create(
             user=user,
             container_connected_name=container_connected_name,
-            identifier=identifier
+            identifier=identifier,
+            token=guacamole_client_token
         )
     except rdpConnection.DoesNotExist:
         return JsonResponse(
@@ -105,6 +108,38 @@ def egister_rdp_connection_view(
             "user": connection.user.username,
             "container_connected_name": connection.container_connected_name,
             "identifier": connection.identifier,
+        },
+        status=200
+    )
+    
+def display_all_rdp_connections_view(request):
+    """
+    HTTP endpoint to get the details of all RDP connections.
+    """
+    try:
+        user = request.user
+        if not user.is_authenticated:
+            return JsonResponse(
+                {"error": "Unauthorized"},
+                status=401
+            )
+        connections = rdpConnection.objects.all()
+        data = []
+        for connection in connections:
+            data.append({
+                "user": connection.user.username,
+                "container_connected_name": connection.container_connected_name,
+                "identifier": connection.identifier,
+                "guacamole_client_token": connection.token
+            })
+    except Exception as e:
+        return JsonResponse(
+            {"error": f"Failed to fetch RDP connections {e}"},
+            status=500
+        )
+    return JsonResponse(
+        {
+            "connections": data
         },
         status=200
     )
