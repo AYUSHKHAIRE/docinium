@@ -4,6 +4,7 @@ from urllib3.util.retry import Retry
 from .logger_config import logger
 
 
+# http://localhost:8080/#/client/MQBjAHBvc3RncmVzcWw
 class GuacamoleClient:
     def __init__(
         self,
@@ -131,3 +132,6 @@ class GuacamoleClient:
             return response.json()
         except Exception as e:
             logger.error(f"{e}")
+            
+    def get_token_for_client(self):
+        return self.token
