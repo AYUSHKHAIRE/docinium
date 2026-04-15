@@ -40,6 +40,7 @@ class rdpConnection(models.Model):
     created = models.DateTimeField(_("Created"), auto_now_add=True)
     container_connected_name = models.CharField(_("Container Connected Name"), max_length=255)
     identifier = models.IntegerField(_("Identifier"))
+    token = models.CharField(_("Token"), max_length=1000)
 
     class Meta:
         verbose_name = _("RDP Connection")
