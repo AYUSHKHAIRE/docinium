@@ -30,6 +30,7 @@ class Container:
         self._django_initialized = False
         self.docker_manager = DockerManager()
         self.container_obj = None
+        self.user_token = None
         # Connect to Django & WebSocket
         self._spin_docinium_container()
         self._connect()
@@ -50,6 +51,7 @@ class Container:
                 f"Preregister failed ({response.status_code}): {response.text}"
             )
         data = response.json()
+        self.user_token = data["token"]
         return username, data["user_id"], data["token"]
 
     def _spin_docinium_container(self):
