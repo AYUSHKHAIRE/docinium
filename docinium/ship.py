@@ -270,11 +270,13 @@ class DocShip:
                 resp = self.guacomole_manager.create_a_new_rdp_connection(
                     name = container.name
                 )
+                guacamole_client_token = self.guacomole_manager.get_token_for_client()
                 # register the rdp connection in the django engine
                 register_rdp_connection(
                     container_connected_name=resp["name"],
                     identifier=resp["identifier"],
-                    token=container.user_token,
+                    auth_token=container.user_token,
+                    guacamole_token=guacamole_client_token,
                     base_url=f"http://localhost:{self.port}"
                 )
                 logger.info("Container mounted successfully .")
