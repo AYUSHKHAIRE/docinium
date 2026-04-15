@@ -30,3 +30,20 @@ class CustomToken(models.Model):
     def __str__(self):
         return self.key
 
+class rdpConnection(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        related_name='rdp_connection',
+        on_delete=models.CASCADE,
+        verbose_name=_("User")
+    )
+    created = models.DateTimeField(_("Created"), auto_now_add=True)
+    container_connected_name = models.CharField(_("Container Connected Name"), max_length=255)
+    identifier = models.IntegerField(_("Identifier"))
+
+    class Meta:
+        verbose_name = _("RDP Connection")
+        verbose_name_plural = _("RDP Connections")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.container_connected_name}"
