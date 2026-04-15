@@ -1,0 +1,74 @@
+{% extends '../base.html' %} {% load static %} {% block content %}
+<link rel="stylesheet" href="{% static '/css/home.css' %}" />
+<section class="hero">
+    <div class="container">
+        {% if user.is_authenticated %}
+        <p>Welcome back, {{ user.username }}!</p>
+            <a href="{% url 'get_rdp_connections' %}" class="btn btn-primary">View Containers</a>
+            {% for connection in connections %}
+                <p>{{ connection.container_connected_name }}</p>
+                <a href="http://localhost:8080/"></a>
+            {% endfor %}
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary">log in</a> to view containers .
+        {% endif %}
+    </div>
+</section>
+<div id="connections-container">
+    <table id="connections-table" class="connections-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Container</th>
+                <th>Identifier</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will come here -->
+        </tbody>
+    </table>
+</div>
+<script>
+    const connections_url = "{% url 'get_rdp_connections' %}";
+
+    fetch(connections_url)
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.querySelector("#connections-table tbody");
+                tbody.innerHTML = "";
+
+                data.connections.forEach(conn => {
+                    const row = document.createElement("tr");
+
+                    // OPTIONAL: decode for display only
+                    let decoded = "";
+                    try {
+                        decoded = atob(conn.identifier);
+                    } catch (e) {
+                        decoded = "invalid";
+                    }
+
+                    const url = `http://localhost:8080/#/client/${conn.identifier}?token=${conn.guacamole_client_token}`;
+
+                    row.innerHTML = `
+                <td>${conn.user}</td>
+                <td>${conn.container_connected_name}</td>
+                <td title="${decoded}">${conn.identifier}</td>
+                <td>
+                    <a href="${url}" 
+                       class="btn-connect"
+                       target="_blank">
+                       Connect
+                    </a>
+                </td>
+            `;
+
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching connections:", error);
+            });
+</script>
+{% endblock content %}
