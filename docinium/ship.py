@@ -9,6 +9,7 @@ from docinium.container.logger_config import logger
 from docinium.dockerclient import DockerManager
 from docinium.glucamole_manager import GuacamoleClient
 from docinium.container_manager import Container
+from .docinium_engine_api import register_rdp_connection
 import threading
 import uuid
 
@@ -179,7 +180,6 @@ class DocShip:
         # attempt guacamole
         self.guacomole_manager = GuacamoleClient()
         users = self.guacomole_manager.list_all_users()
-        # logger.debug(f"Guacamole users {users}")
         logger.info(f"Docked the {self.name} at http://0.0.0.0:{self.port} successfully...")
 
     def dock(self):
@@ -270,12 +270,16 @@ class DocShip:
                 resp = self.guacomole_manager.create_a_new_rdp_connection(
                     name = container.name
                 )
-                # get client as
-                # http://localhost:8080/#/client/1?token=C85453D1102371CA5BD305007B0003AE27130AAEB45A3638D962C0379D3C57B1
-                logger.debug(f"{resp}")
+                # register the rdp connection in the django engine
+                register_rdp_connection(
+                    container_connected_name=resp["name"],
+                    identifier=resp["identifier"],
+                    token=container.user_token,
+                    base_url=f"http://localhost:{self.port}"
+                )
                 logger.info("Container mounted successfully .")
             except Exception as e:
-                logger.error(f"failed to create an rdp connection{e}")
+                logger.error(f"failed to create an rdp connection {e}")
         except Exception as e:
             logger.error(f"Error in mountaing container {e}")
             return ValueError(f"{container} can't be mounted . {e}")
