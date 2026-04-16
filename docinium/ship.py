@@ -5,7 +5,7 @@ import subprocess
 import os
 import time
 from dotenv import load_dotenv
-from docinium.container.logger_config import logger
+from .logger_config import logger
 from docinium.dockerclient import DockerManager
 from docinium.glucamole_manager import GuacamoleClient
 from docinium.container_manager import Container
