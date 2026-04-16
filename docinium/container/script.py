@@ -1,8 +1,14 @@
 import time
-import logging
 import undetected_chromedriver as uc
+import loguru
 
-logger = logging.getLogger(__name__)
+logger = loguru.logger.add(
+    "docinium_container.log",
+    rotation="10 MB",
+    retention="7 days",
+    level="TRACE",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
+)
 
 
 class SeleniumLauncher:
