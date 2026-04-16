@@ -112,7 +112,6 @@ WORKDIR /container
 
 COPY requirements.txt .
 COPY script.py .
-COPY logger_config.py .
 
 RUN pip3 install -r requirements.txt
 
