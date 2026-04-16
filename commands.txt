@@ -1,0 +1,9 @@
+# for python environments 
+
+python3 -m venv env 
+source env/bin/activate
+pip freeze > requirements.txt
+
+tree . -I '__pycache__|containerenv|env' > structure.md
+
+docker build -t docinium_container . 

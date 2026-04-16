@@ -1,5 +1,4 @@
 env
-commands.txt
 docinium/container/containerenv
 docinium/docinium_engine/connector/migrations
 docinium/docinium_engine/db.sqlite3
