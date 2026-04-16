@@ -4,3 +4,4 @@ docinium/docinium_engine/connector/migrations
 docinium/docinium_engine/db.sqlite3
 *__pycache__/
 *.pyc
+*.log
