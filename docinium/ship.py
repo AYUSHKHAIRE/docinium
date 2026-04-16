@@ -12,6 +12,7 @@ from docinium.container_manager import Container
 from .docinium_engine_api import register_rdp_connection
 import threading
 import uuid
+import sys
 
 # my own functionalities
 from docinium.exceptions import (
@@ -98,7 +99,6 @@ class DocShip:
         """
         manage_py_path = os.path.abspath("docinium/docinium_engine/manage.py")
         try:
-            import sys
             self.engine_process = subprocess.Popen(
                 [sys.executable, "-u" ,manage_py_path, "runserver", f"0.0.0.0:{self.port}"],
                 stdout=subprocess.PIPE,
@@ -106,7 +106,6 @@ class DocShip:
                 text=True,
                 bufsize=1 
             )
-            time.sleep(3)
             threading.Thread(target=self.stream_logs, args=(self.engine_process,), daemon=True).start()
             # logger.info("Starter command for django ran .")
         except Exception as e:
@@ -179,8 +178,12 @@ class DocShip:
         self._start_the_engine()
         # attempt guacamole
         self.guacomole_manager = GuacamoleClient()
-        users = self.guacomole_manager.list_all_users()
         logger.info(f"Docked the {self.name} at http://0.0.0.0:{self.port} successfully...")
+        logger.debug("-"*50)
+        logger.debug(" "*50)
+        logger.debug(f"{self.name.upper()} docked at http://0.0.0.0:{self.port}")
+        logger.debug(" "*50)
+        logger.debug("-"*50)
 
     def dock(self):
         """
