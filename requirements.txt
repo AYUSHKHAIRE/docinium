@@ -17,9 +17,12 @@ django-channels==0.7.0
 django-cors-headers==4.9.0
 docker==7.1.0
 dotenv==0.9.9
+guacamole-api-wrapper==0.1.0
+guacapy==1.20251014.1
 hyperlink==21.0.0
 idna==3.11
 Incremental==24.11.0
+loguru==0.7.3
 msgpack==1.1.2
 oauthlib==3.3.1
 packaging==25.0
