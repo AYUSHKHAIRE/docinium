@@ -3,8 +3,7 @@
 <section class="hero">
     <div class="container">
         {% if user.is_authenticated %}
-        <p>Welcome back, {{ user.username }}!</p>
-            <a href="{% url 'get_rdp_connections' %}" class="btn btn-primary">View Containers</a>
+        <h1>Containers</h1>
             {% for connection in connections %}
                 <p>{{ connection.container_connected_name }}</p>
                 <a href="http://localhost:8080/"></a>
@@ -15,23 +14,25 @@
     </div>
 </section>
 <div id="connections-container">
-    <table id="connections-table" class="connections-table">
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Container</th>
-                <th>Identifier</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Data will come here -->
-        </tbody>
-    </table>
+    <div class="center-flex" >
+        <a class="btn-connect" id="apache-glucamole-page-url" href="">Visit glucamole page</a>
+        <table id="connections-table" class="connections-table">
+            <thead>
+                <tr>
+                    <th>Container</th>
+                    <th>Identifier</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will come here -->
+            </tbody>
+        </table>
+    </div>
 </div>
 <script>
     const connections_url = "{% url 'get_rdp_connections' %}";
-
+    let apache_guacamole_url = "http://localhost:8080/#/client/";
     fetch(connections_url)
             .then(response => response.json())
             .then(data => {
@@ -39,6 +40,11 @@
                 tbody.innerHTML = "";
 
                 data.connections.forEach(conn => {
+                    if (!apache_guacamole_url.includes("token")) {
+                        apache_guacamole_url += `?token=${conn.guacamole_client_token}`;
+                        const guacamoleLink = document.getElementById("apache-glucamole-page-url");
+                        guacamoleLink.href = apache_guacamole_url;
+                    }
                     const row = document.createElement("tr");
 
                     // OPTIONAL: decode for display only
@@ -52,7 +58,6 @@
                     const url = `http://localhost:8080/#/client/${conn.identifier}?token=${conn.guacamole_client_token}`;
 
                     row.innerHTML = `
-                <td>${conn.user}</td>
                 <td>${conn.container_connected_name}</td>
                 <td title="${decoded}">${conn.identifier}</td>
                 <td>

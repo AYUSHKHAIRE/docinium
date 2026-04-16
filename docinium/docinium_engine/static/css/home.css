@@ -87,33 +87,12 @@ p {
   }
 }
 
-.connections-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.connections-table th,
-.connections-table td {
-  padding: 12px 15px;
-  text-align: left;
-}
-
-.connections-table thead {
-  background: #1f2937;
-  color: #fff;
-}
-
-.connections-table tbody tr {
-  border-bottom: 1px solid #eee;
-}
-
-.connections-table tbody tr:hover {
-  background: #f9fafb;
+.center-flex{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .btn-connect {
@@ -129,8 +108,44 @@ p {
   background: #1d4ed8;
 }
 
+.center-flex{
+  overflow-y: scroll;
+}
+table {
+  /* width: 100%; */
+  border-collapse: collapse;
+  margin-top: 20px;
+  /* max-width: 800px; */
+  background-color: transparent;
+  overflow-y: scroll;
+}
+
+thead,
+tbody,
+tr {
+  background-color: transparent;
+}
+
+th,
 td {
-  font-weight: bold;
-  color: #eee;
-  background-color: black;
+  padding: 12px 16px;
+  text-align: left;
+  background-color: transparent;
+  /* force remove white */
+}
+
+th {
+  color: #ffffff;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+td {
+  color: #e0e0e0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* subtle hover */
+tr:hover td {
+  background-color: rgba(255, 255, 255, 0.05);
 }
