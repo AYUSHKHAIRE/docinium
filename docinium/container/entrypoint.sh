@@ -69,10 +69,12 @@ cat > /home/docinium/.config/autostart/selenium.desktop <<EOF
 [Desktop Entry]
 Type=Application
 Name=Selenium Script
-Exec=python3 /container/script.py
+Exec=bash -c 'source /container/runtime.env && python3 /container/script.py'
 X-GNOME-Autostart-enabled=true
 EOF
 chown -R docinium:docinium /home/docinium/.config
+
+env | grep DOCINIUM > /container/runtime.env
 
 echo "[entrypoint] starting xrdp services"
 # run XRDP in background
