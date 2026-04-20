@@ -1,6 +1,6 @@
-import loguru
+from loguru import logger
 
-logger = loguru.logger.add(
+logger.add(
     "docinium_container.log",
     rotation="10 MB",
     retention="7 days",
