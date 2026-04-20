@@ -31,6 +31,7 @@ class Container:
         self.docker_manager = DockerManager()
         self.container_obj = None
         self.user_token = None
+        self.user_id = None
         # Connect to Django & WebSocket
         self._spin_docinium_container()
         self._connect()
@@ -52,35 +53,41 @@ class Container:
             )
         data = response.json()
         self.user_token = data["token"]
+        self.user_id = data["user_id"]
         return username, data["user_id"], data["token"]
 
     def _spin_docinium_container(self):
+        _ , user_id , token = self._preregister_user_http(
+            username=f"docinium_container_{self.name}",
+            base_url=self.url_to_connect
+        )
         try:
             if self.docker_manager.check_if_docker_container_exist(self.name):
                 self.docker_manager.delete_docker_container(self.name)
+            env_vars = {
+                "DOCINIUM_EXECUTOR_URL": f"ws://{self.url_to_connect}/ws/docinium/{self.user_id}/",
+                "DOCINIUM_EXECUTOR_USER_ID": f"docinium_container_{self.name}",
+                "DOCINIUM_EXECUTOR_AUTH_TOKEN": self.user_token or "",
+                "DOCINIUM_EXECUTOR_IP": self.local_ip,
+                "DOCINIUM_EXECUTOR_PORT": str(self.port_to_connect)
+            }
             self.container_obj = self.docker_manager.spin_up_docker_container(
                 image_name="docinium_container",
                 network_name="docinium_network",
                 container_name=self.name,
-                environment={
-                    "SCREENDEX":"1920X1080"
-                }
+                environment=env_vars
             )
             logger.warning(f"spinned up {self.name} successfully . ")
         except Exception as e:
             logger.error(f"error in spinning up docinium container {e}")
 
     def _connect(self):
-        _ , user_id , token = self._preregister_user_http(
-            username=f"docinium_container_{self.name}",
-            base_url=self.url_to_connect
-        )
         # Setup WebSocket
-        websocket_uri = f"ws://{self.url_to_connect}/ws/docinium/{user_id}/"
+        websocket_uri = f"ws://{self.url_to_connect}/ws/docinium/{self.user_id}/"
         self.ws_client = WebSocketClient(
             uri=websocket_uri,
-            user_id=user_id,
-            auth_token=token,
+            user_id=self.user_id,
+            auth_token=self.user_token,
             ip=self.local_ip,
             port=self.port_to_connect
         )
