@@ -41,7 +41,7 @@ RUN apt update && apt install -y \
     pulseaudio pulseaudio-utils pavucontrol \
     dbus-x11 x11-xserver-utils \
     sudo vim git wget tar locales \
-    python3 python3-pip \
+    python3 python3-pip python3-tk python3-dev\
     ca-certificates && \
     locale-gen en_US.UTF-8 && \
     rm -rf /var/lib/apt/lists/*
@@ -110,6 +110,9 @@ RUN sed -i 's/^port=3389/port=3389/' /etc/xrdp/xrdp.ini && \
 # ------------------------------------------------------------
 WORKDIR /container
 
+RUN chown -R docinium:docinium /container
+
+COPY utils/ ./utils/
 COPY requirements.txt .
 COPY script.py .
 
