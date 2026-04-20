@@ -1,99 +1,42 @@
+from utils.logger_config import logger
+from utils.WebsocketClient import WebSocketClient
+from utils.gui import ScreenController
+from threading import Thread
+import os
 import time
-import undetected_chromedriver as uc
-import loguru
+from dotenv import load_dotenv
 
-logger = loguru.logger.add(
-    "docinium_container.log",
-    rotation="10 MB",
-    retention="7 days",
-    level="TRACE",
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
+class DociniumExecutor:
+    def __init__(self, uri, user_id, auth_token, ip, port):
+        self.websocket_client = WebSocketClient(uri, user_id, auth_token, ip, port)
+        self.screen_controller = ScreenController()
+
+    def start(self):
+        # Start the WebSocket client in a separate thread
+        websocket_thread = Thread(target=self.websocket_client.run)
+        websocket_thread.start()
+        
+        logger.info("Docinium Executor started and WebSocket client is running in a separate thread.")
+
+load_dotenv("runtime.env")
+
+url = os.getenv("DOCINIUM_EXECUTOR_URL")
+user_id = os.getenv("DOCINIUM_EXECUTOR_USER_ID")
+auth_token = os.getenv("DOCINIUM_EXECUTOR_AUTH_TOKEN")
+ip = os.getenv("DOCINIUM_EXECUTOR_IP")
+port = os.getenv("DOCINIUM_EXECUTOR_PORT")
+ 
+logger.info(f"Docinium Executor configuration - URL: {url}, User ID: {user_id}, IP: {ip}, Port: {port}")
+ 
+DE = DociniumExecutor(
+    uri=url,
+    user_id=user_id,
+    auth_token=auth_token,
+    ip=ip,
+    port=port
 )
+DE.start()
 
+time.sleep(10) 
 
-class SeleniumLauncher:
-    """
-    Launch undetected Chrome Selenium driver and resize window accurately.
-    """
-
-    def __init__(self, screen_width: int = 1920, screen_height: int = 1080, headless: bool = True):
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.headless = headless
-        self.driver = None
-
-    def setup_selenium_driver(self):
-        """
-        Setup undetected Chrome Selenium driver,
-        resize the window accurately.
-
-        Output:
-            None (sets self.driver)
-        """
-        start_time = time.time()
-
-        # ------------------------------------------------------------
-        # Chrome Options
-        # ------------------------------------------------------------
-        chrome_options = uc.ChromeOptions()
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        chrome_options.add_argument("--disable-infobars")
-        chrome_options.add_argument("--disable-extensions")
-        chrome_options.add_argument("--start-maximized")
-
-        # if self.headless:
-        #     chrome_options.add_argument("--headless=new")
-
-        chrome_options.set_capability(
-            "goog:loggingPrefs", {"browser": "ALL"}
-        )
-
-        # ------------------------------------------------------------
-        # Launch Driver
-        # ------------------------------------------------------------
-        driver = uc.Chrome(
-            options=chrome_options,
-            use_subprocess=True
-        )
-
-        # ------------------------------------------------------------
-        # Accurate Window Resize (outer vs inner)
-        # ------------------------------------------------------------
-        outer_width = driver.execute_script("return window.outerWidth;")
-        inner_width = driver.execute_script("return window.innerWidth;")
-        outer_height = driver.execute_script("return window.outerHeight;")
-        inner_height = driver.execute_script("return window.innerHeight;")
-
-        width_diff = outer_width - inner_width
-        height_diff = outer_height - inner_height
-
-        final_width = self.screen_width + width_diff
-        final_height = self.screen_height + height_diff
-
-        driver.set_window_size(final_width, final_height)
-
-        # ------------------------------------------------------------
-        # Finalize
-        # ------------------------------------------------------------
-        self.driver = driver
-
-        end_time = time.time()
-        logger.info(
-            f"[ SETUP ] Undetected Chrome initialized in "
-            f"{end_time - start_time:.4f} seconds | "
-            f"Viewport: {self.screen_width}x{self.screen_height}"
-        )
-
-launcher = SeleniumLauncher(
-    screen_width=1920,
-    screen_height=1080,
-    headless=True
-)
-
-launcher.setup_selenium_driver()
-driver = launcher.driver
-
-driver.get("https://www.google.com")
-time.sleep(5000)
+logger.info("Docinium Executor is running. Press Ctrl+C to stop.")
