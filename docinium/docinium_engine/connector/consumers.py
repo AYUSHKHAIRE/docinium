@@ -49,7 +49,7 @@ class WebSocketConsumer(
                     text_data
                 )
                 # logger.warning(data)
-                message_type = data.get("special")
+                message_type = data.get("type")
                 user_id = data.get(
                     "user_id", 
                     "unknown"
@@ -67,8 +67,14 @@ class WebSocketConsumer(
                         "message": "Hello from server!"
                     }
                     logger.info(f"Saying hello to user {user_id}")
-
+                elif message_type == "desktop_click":
+                    response = {
+                        "type": "desktop_click",
+                        "message": data["message"]
+                    }
+                    logger.info(f"Received desktop click at {data['message']} from user {user_id}")
                 else:
+                    logger.warning(f"Unknown message type from user {user_id}: {message_type} , data: {data}")
                     response = {
                         "type": "error",
                         "message": "Unknown message type."
