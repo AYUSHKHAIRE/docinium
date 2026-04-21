@@ -44,7 +44,8 @@ class WebSocketClient:
         user_id, 
         auth_token,
         ip,
-        port
+        port,
+        message_handler=None
     ):
         self.uri = uri
         self.user_id = user_id
@@ -53,6 +54,8 @@ class WebSocketClient:
         self.ip = ip
         self.port = port
         self.loop = asyncio.new_event_loop()
+        self.message_handler = message_handler
+        logger.debug(f"WebSocketClient initialized with URI: {self.uri}, User ID: {self.user_id}")
     
     """
     start operation in thread
@@ -153,7 +156,7 @@ class WebSocketClient:
         if self.websocket:
             try:
                 message_payload = {
-                    "special": type,
+                    "type": type,
                     "user_id": self.user_id,
                     "message": message,
                 }
@@ -239,6 +242,9 @@ class WebSocketClient:
     ):
         logger.info(f'[docinium_container > websocket docinium_container > websocket client]{message}')
         data = json.loads(message)
+        logger.debug(f"Handling message of type: {data.get('type')} with content: {data.get('message')}")
+        if self.message_handler:
+            self.message_handler(data)
         if data.get("type") == "register":
             logger.info(f"[ docinium_container > websocket docinium_container > websocket client ] Registration successful for user_id: {self.user_id}")
             # Send hello message
