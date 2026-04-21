@@ -53,6 +53,8 @@ class WebSocketClient:
         self.ip = ip
         self.port = port
         self.loop = asyncio.new_event_loop()
+        logger.debug(f"WebSocketClient initialized with URI: {self.uri}, User ID: {self.user_id}")
+
     
     """
     start operation in thread
@@ -153,7 +155,7 @@ class WebSocketClient:
         if self.websocket:
             try:
                 message_payload = {
-                    "special": type,
+                    "type": type,
                     "user_id": self.user_id,
                     "message": message,
                 }
@@ -162,7 +164,7 @@ class WebSocketClient:
                         message_payload
                         )
                     )
-                logger.info(f"[ docinium_engine > websocket client ] Sent message: {len(message_payload)}")
+                logger.info(f"[ docinium_engine > websocket client ] Sent message: {message_payload}")
             except Exception as e:
                 logger.error(f"[ docinium_engine > websocket client ] Error sending message: {e}")
         else:
@@ -239,6 +241,7 @@ class WebSocketClient:
     ):
         logger.info(f'[docinium_engine > websocket docinium_engine > websocket client]{message}')
         data = json.loads(message)
+        logger.debug(f"Handling message of type: {data.get('type')} with content: {data.get('message')}")
         if data.get("type") == "register":
             logger.info(f"[ docinium_engine > websocket docinium_engine > websocket client ] Registration successful for user_id: {self.user_id}")
             # Send hello message
@@ -246,3 +249,5 @@ class WebSocketClient:
                 type="hello", 
                 message="Hello, server!"
             )
+        if data.get("type") == "desktop_click":
+            logger.info(f"Received desktop click at {data.get('message')} from server for user_id {self.user_id}")
