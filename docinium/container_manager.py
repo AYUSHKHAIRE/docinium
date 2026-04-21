@@ -99,5 +99,12 @@ class Container:
         # Send a test message
         self.ws_client.send_message_thread_safe(type="hello", message="Hello, server!")
 
+    def send_message(self, type, message):
+        if self.ws_client:
+            logger.debug(f"sending message to {self.user_id}")
+            self.ws_client.send_message_thread_safe(type=type, message=message)
+        else:
+            logger.error("WebSocket client is not connected.")
+
     def __str__(self):
         return self.name
