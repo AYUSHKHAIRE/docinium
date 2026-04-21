@@ -8,15 +8,27 @@ from dotenv import load_dotenv
 
 class DociniumExecutor:
     def __init__(self, uri, user_id, auth_token, ip, port):
-        self.websocket_client = WebSocketClient(uri, user_id, auth_token, ip, port)
+        self.websocket_client = WebSocketClient(
+            uri, 
+            user_id, 
+            auth_token, 
+            ip, 
+            port,
+            message_handler=self.message_handler
+        )
         self.screen_controller = ScreenController()
 
     def start(self):
         # Start the WebSocket client in a separate thread
-        websocket_thread = Thread(target=self.websocket_client.run)
-        websocket_thread.start()
+        self.websocket_thread = Thread(target=self.websocket_client.run)
+        self.websocket_thread.start()
         
         logger.info("Docinium Executor started and WebSocket client is running in a separate thread.")
+        
+    def message_handler(self, message):
+        logger.debug(f"Received message through WebSocket handler: {message}")
+        # Here you can add logic to handle different types of messages and interact with the screen controller as needed.
+        
 
 load_dotenv("runtime.env")
 
