@@ -7,7 +7,11 @@
 │   │   ├── entrypoint.sh
 │   │   ├── README.md
 │   │   ├── requirements.txt
-│   │   └── script.py
+│   │   ├── script.py
+│   │   └── utils
+│   │       ├── gui.py
+│   │       ├── logger_config.py
+│   │       └── WebsocketClient.py
 │   ├── container_manager.py
 │   ├── docinium_engine
 │   │   ├── connector
@@ -68,7 +72,6 @@
 ├── requirements.txt
 ├── scripts
 │   └── stop_docinium_containers.sh
-├── structure.md
-└── structure.txt
+└── structure.md
 
-15 directories, 57 files
+16 directories, 59 files
