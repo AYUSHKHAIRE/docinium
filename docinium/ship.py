@@ -224,12 +224,11 @@ class DocShip:
         Raises:
             UnDockShipError: If the port is still in use after termination.
         """
+        # turn down engine process
         if self.engine_process:
             self.engine_process.terminate()
             self.engine_process.wait()
-            if self._is_port_in_use():
-                raise UnDockShipError()
-            print(f"Ship on port {self.port} has been undocked successfully.")
+            # takedown the docker containers and network
             required_images  = {
                     "redis:latest": {
                         "container_name": "docinium_redis",
@@ -247,6 +246,13 @@ class DocShip:
                 }
             for cont_k , cont_v in required_images.items():
                 self.docker_manager.delete_docker_container(cont_v["container_name"])
+            # close websocket connection for all containers
+            for cont_k , cont_v in self.mounted_containers.items():
+               self.mounted_containers[cont_k].ws_client.close()
+            self.mounted_containers = {}
+            if self._is_port_in_use():
+                raise UnDockShipError()
+            logger.info(f"Undocked the {self.name} successfully and freed the port {self.port} ...")
         else:
             print("No engine process to stop.")
         self.port = None
