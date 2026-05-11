@@ -187,3 +187,277 @@ This will open the containerized desktop environment in your browser.
 Additionally, Docinium provides a Django admin panel where you can manage users and monitor active RDP connections.
 
 ![Django Admin](https://github.com/AYUSHKHAIRE/docinium/blob/main/public/images/7.png?raw=true)
+
+---
+
+---
+
+# Architecture
+
+![Docinium Architecture](https://github.com/AYUSHKHAIRE/docinium/blob/main/public/images/docinium_architecture.png?raw=true)
+
+Docinium is built as a distributed desktop orchestration platform that combines Docker containers, Django, WebSockets, Apache Guacamole, and a high-level Python SDK into a unified system for managing browser-accessible desktop environments.
+
+The architecture is designed to provide:
+
+- Secure isolated desktop environments
+- Real-time browser interaction
+- Multi-container orchestration
+- Remote desktop accessibility
+- Scalable communication through WebSockets
+- Developer-friendly automation APIs
+
+---
+
+## Core Components
+
+### 1. Docinium SDK (Python Library)
+
+The Docinium SDK is the main orchestration layer used by developers.
+
+It is responsible for:
+
+- Spinning up Docker desktop containers
+- Managing container lifecycle
+- Mounting containers onto ships
+- Connecting containers to the central server
+- Handling orchestration logic
+- Managing WebSocket communication
+
+The SDK exposes high-level abstractions such as:
+
+```python
+ship = DocShip(...)
+container = Container(...)
+```
+
+This allows developers to manage multiple desktop environments programmatically using Python.
+
+---
+
+### 2. Django Engine
+
+The Django engine acts as the central control server of Docinium.
+
+Responsibilities include:
+
+- User authentication
+- Session management
+- Web interface rendering
+- Managing desktop metadata
+- Recording RDP connections
+- Creating Guacamole connection mappings
+- Managing active WebSocket connections
+- Providing the unified browser interface
+
+The Django backend is powered using:
+
+- Django
+- Django Channels
+- ASGI
+- WebSockets
+
+---
+
+### 3. Redis Communication Layer
+
+Redis is used as the real-time communication backbone for Django Channels.
+
+It handles:
+
+- WebSocket channel layers
+- Real-time event distribution
+- Connection synchronization
+- Async communication support
+
+Redis enables scalable bidirectional communication between:
+
+- Django
+- Browser clients
+- Desktop containers
+
+---
+
+### 4. Apache Guacamole
+
+Apache Guacamole provides browser-based remote desktop streaming.
+
+Docinium uses Guacamole to expose desktop environments directly inside the browser without requiring local RDP clients.
+
+Guacamole is responsible for:
+
+- Browser-accessible desktop sessions
+- RDP proxying
+- Remote desktop streaming
+- User desktop access
+
+The Django engine dynamically manages Guacamole users and RDP connection records.
+
+---
+
+### 5. Desktop Containers
+
+Each desktop environment runs inside an isolated Docker container.
+
+Every container includes:
+
+- XFCE desktop environment
+- XRDP server
+- PulseAudio support
+- Google Chrome
+- Python runtime
+- Internal communication scripts
+- WebSocket client connection to the server
+
+Each container operates independently with Docker-level isolation including:
+
+- Filesystem isolation
+- Network isolation
+- Process isolation
+
+This enables secure multi-desktop orchestration.
+
+---
+
+## Communication Flow
+
+### Container Lifecycle
+
+```text
+Python SDK
+    ↓
+Docker Container Creation
+    ↓
+Desktop Container Starts
+    ↓
+Container Connects via WebSocket
+    ↓
+Django Registers Connection
+    ↓
+Guacamole RDP Mapping Created
+    ↓
+Desktop Becomes Available in Browser
+```
+
+---
+
+## Browser Interaction Flow
+
+```text
+User Browser
+    ↓
+Django Web Interface
+    ↓
+Apache Guacamole
+    ↓
+XRDP inside Container
+    ↓
+XFCE Desktop Environment
+```
+
+---
+
+## Real-Time Communication Flow
+
+```text
+Desktop Container
+    ↕ WebSocket
+Django Channels
+    ↕ Redis
+Browser Interface
+```
+
+This allows real-time communication between:
+
+- Desktop containers
+- Backend services
+- Browser clients
+
+---
+
+## Internal Project Structure
+
+### SDK Layer
+
+```text
+docinium/
+├── ship.py
+├── container_manager.py
+├── dockerclient.py
+├── glucamole_manager.py
+├── WebsocketClient.py
+└── docinium_engine_api.py
+```
+
+Handles orchestration, Docker management, WebSocket communication, and Guacamole integration.
+
+---
+
+### Django Engine
+
+```text
+docinium/docinium_engine/
+```
+
+Contains:
+
+- Authentication system
+- Web UI
+- Django Channels consumers
+- Models
+- Routing
+- APIs
+- WebSocket services
+
+---
+
+### Desktop Container Runtime
+
+```text
+docinium/container/
+```
+
+Contains:
+
+- Dockerfile
+- Desktop startup scripts
+- GUI interaction logic
+- Container-side WebSocket client
+- Audio and desktop environment setup
+
+---
+
+## Security and Isolation
+
+Docinium relies on Docker containerization to provide isolation between desktop sessions.
+
+Each desktop container has:
+
+- Independent processes
+- Isolated networking
+- Separate filesystem space
+- Dedicated desktop session
+
+This architecture enables multiple desktop environments to run securely on the same host machine.
+
+---
+
+## Design Philosophy
+
+Docinium is designed as both:
+
+- A developer-friendly Python orchestration library
+- A browser-based remote desktop platform
+
+The system combines infrastructure orchestration with accessible browser interaction to simplify management of distributed desktop environments.
+
+Its architecture makes it suitable for:
+
+- Remote desktop infrastructure
+- Automation systems
+- Educational labs
+- Accessibility-focused computing
+- Multi-user desktop platforms
+- Browser-based development environments
+
+--- 
