@@ -1,7 +1,7 @@
 from docinium import DocShip
 from docinium import Container
 
-PORT = 23505
+PORT = 23507
 
 ship = DocShip(name="ship 1", port=PORT)
 ship.dock()
