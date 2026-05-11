@@ -69,7 +69,7 @@ cat > /home/docinium/.config/autostart/selenium.desktop <<EOF
 [Desktop Entry]
 Type=Application
 Name=Selenium Script
-Exec=bash -c 'source /container/runtime.env && python3 /container/script.py'
+Exec=bash -c 'sleep 3; export $(grep -v "^#" /container/runtime.env | xargs); sleep 3; python3 /container/script.py'
 X-GNOME-Autostart-enabled=true
 EOF
 chown -R docinium:docinium /home/docinium/.config
