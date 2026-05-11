@@ -12,7 +12,9 @@ class ScreenController:
         pyautogui.moveTo(x, y)
 
     def click_mouse(self, x, y):
+        self.move_mouse(x,y)
         pyautogui.click(x, y)
+        logger.debug("Executed click successfully")
 
     def click_based_on_image(self, image_base64):
         location = pyautogui.locateOnScreen(image_base64, confidence=0.8)
