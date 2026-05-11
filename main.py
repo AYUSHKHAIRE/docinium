@@ -1,7 +1,7 @@
 from docinium import DocShip
 from docinium import Container
 
-PORT = 23501
+PORT = 23505
 
 ship = DocShip(name="ship 1", port=PORT)
 ship.dock()
@@ -13,16 +13,18 @@ container = Container(
 
 ship.mount(container)
 
-ship.wait(5)
+ship.wait(60)
 
 container.send_message(
     type="desktop_click", 
     message={
         "click":{
-            "x": 100,
-            "y": 200
+            "x": 30,
+            "y": 30
         }
     }
 )
+
+ship.wait(300)
 
 ship.unDock()
