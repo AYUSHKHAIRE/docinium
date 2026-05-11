@@ -27,10 +27,15 @@ class DociniumExecutor:
         
     def message_handler(self, message):
         logger.debug(f"Received message through WebSocket handler: {message}")
-        # Here you can add logic to handle different types of messages and interact with the screen controller as needed.
-        
+        if message["type"] == "desktop_click":
+            x_cord = message["message"]["click"]["x"]
+            y_cord = message["message"]["click"]["y"]
+            self.screen_controller.click_mouse(
+                x = x_cord ,
+                y = y_cord
+            )
 
-load_dotenv("runtime.env")
+load_dotenv("/container/runtime.env")
 
 url = os.getenv("DOCINIUM_EXECUTOR_URL")
 user_id = os.getenv("DOCINIUM_EXECUTOR_USER_ID")
