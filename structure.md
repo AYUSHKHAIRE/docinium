@@ -68,10 +68,11 @@
 ├── docinium_container.log
 ├── docinium.log
 ├── main.py
+├── public
 ├── README.md
 ├── requirements.txt
 ├── scripts
 │   └── stop_docinium_containers.sh
 └── structure.md
 
-16 directories, 59 files
+17 directories, 59 files
